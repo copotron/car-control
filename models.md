@@ -27,5 +27,5 @@ This lists the cars with power steering that is controlled by car computer:
 - Toyota Corolla (2017...) - Steering, Accelerator, Brake
 - Lexus IS series (2012-)  - Steering, Accelerator, Brake
 - Nissan Juke (2014-) - Steering, Accelerator
-- Kia Soul (2015-...) - Steering, Accelerator
+- Kia Soul (2014-...) - Steering, Accelerator - All KIA (without Picanto) 2014+ have same systems (update by karolmajek)
 - Ford Fusion (2015-...) - - Steering, Accelerator, Brake
