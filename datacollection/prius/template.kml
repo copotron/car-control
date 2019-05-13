@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Drive Point 1 Meters Localization</name>
+    <description/>
+    <Style id="line-C2185B-2000-nodesc-normal">
+      <LineStyle>
+        <color>ff5b18c2</color>
+        <width>2</width>
+      </LineStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <Style id="line-C2185B-2000-nodesc-highlight">
+      <LineStyle>
+        <color>ff5b18c2</color>
+        <width>3</width>
+      </LineStyle>
+      <BalloonStyle>
+        <text><![CDATA[<h3>$[name]</h3>]]></text>
+      </BalloonStyle>
+    </Style>
+    <StyleMap id="line-C2185B-2000-nodesc">
+      <Pair>
+        <key>normal</key>
+        <styleUrl>#line-C2185B-2000-nodesc-normal</styleUrl>
+      </Pair>
+      <Pair>
+        <key>highlight</key>
+        <styleUrl>#line-C2185B-2000-nodesc-highlight</styleUrl>
+      </Pair>
+    </StyleMap>
+    <Folder>
+      <name>First line</name>
+      <Placemark>
+        <name>Line 1</name>
+        <styleUrl>#line-C2185B-2000-nodesc</styleUrl>
+        <LineString>
+          <tessellate>1</tessellate>
+          <coordinates>
+          <!-- 
+          -122.095855,47.685644,0.31
+           -122.095862,47.685639,0.31
+           -122.095869,47.685633,0.31
+           -122.095876,47.685627,0.33
+          ->
+          {{CORODINATES}}
+          </coordinates>
+        </LineString>
+      </Placemark>
+    </Folder>
+  </Document>
+</kml>
